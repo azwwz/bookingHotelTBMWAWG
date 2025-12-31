@@ -1,7 +1,7 @@
 package models
 
 type TemplateData struct {
-	stringMap map[string]string
+	StringMap map[string]string
 	IntMap    map[string]int
 	FloatMap  map[string]float32
 	Data      map[string]interface{}
