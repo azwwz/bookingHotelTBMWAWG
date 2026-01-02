@@ -3,8 +3,8 @@ package main
 import (
 	"net/http"
 
-	"github.com/azwwz/bookingHotelTBMWAWG/pkg/config"
-	"github.com/azwwz/bookingHotelTBMWAWG/pkg/handlers"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/handlers"
 	"github.com/go-chi/chi/v5"
 )
 

@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/azwwz/bookingHotelTBMWAWG/pkg/config"
-	"github.com/azwwz/bookingHotelTBMWAWG/pkg/models"
-	"github.com/azwwz/bookingHotelTBMWAWG/pkg/render"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
 )
 
 var Repo *Repository
