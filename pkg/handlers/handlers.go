@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/azwwz/bookingHotelTBMWAWG/pkg/config"
@@ -58,6 +60,25 @@ func (repo *Repository) PostAvailability(w http.ResponseWriter, r *http.Request)
 	start := r.Form.Get("start")
 	end := r.Form.Get("end")
 	fmt.Fprintf(w, "yout start time is %s, endtime is %s", start, end)
+}
+
+type jsonAvailabilityJson struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+}
+
+func (repo *Repository) AvailabilityJson(w http.ResponseWriter, r *http.Request) {
+	resp := jsonAvailabilityJson{
+		Ok:      true,
+		Message: "2025年12月31日",
+	}
+	out, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(string(out))
+	w.Header().Set("content-type", "application/json")
+	w.Write(out)
 }
 
 func (repo *Repository) Contact(w http.ResponseWriter, r *http.Request) {
