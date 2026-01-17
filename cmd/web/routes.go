@@ -23,6 +23,9 @@ func routes(app *config.AppConfig) http.Handler {
 	r.Post("/search-availability-json", handlers.Repo.AvailabilityJson)
 
 	r.Get("/make-reservation", handlers.Repo.Reservation)
+	r.Post("/make-reservation", handlers.Repo.PostReservation)
+	r.Get("/reservation-summary", handlers.Repo.ReservationSummary)
+
 	r.Get("/contact", handlers.Repo.Contact)
 
 	//fileserver return handler get file

@@ -1,19 +1,40 @@
 package main
 
 import (
+	"encoding/gob"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/azwwz/bookingHotelTBMWAWG/pkg/config"
-	"github.com/azwwz/bookingHotelTBMWAWG/pkg/handlers"
-	"github.com/azwwz/bookingHotelTBMWAWG/pkg/render"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/handlers"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
 )
 
 var sessionManager *scs.SessionManager
 var app *config.AppConfig
 
 func main() {
+	err := run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// start the server
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: routes(app),
+	}
+
+	err = srv.ListenAndServe()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func run() error {
+	gob.Register(models.Reservation{})
 
 	// create golbal app config
 	app = &config.AppConfig{}
@@ -39,19 +60,9 @@ func main() {
 	// create template cache bind to the app config
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	app.TemplateCache = tc
 	app.UseCache = false
-
-	// start the server
-	srv := &http.Server{
-		Addr:    ":8080",
-		Handler: routes(app),
-	}
-
-	err = srv.ListenAndServe()
-	if err != nil {
-		panic(err)
-	}
+	return nil
 }

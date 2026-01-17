@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/azwwz/bookingHotelTBMWAWG/pkg/config"
-	"github.com/azwwz/bookingHotelTBMWAWG/pkg/models"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
 	"github.com/justinas/nosurf"
 )
 
@@ -22,6 +22,9 @@ func NewTemplates(a *config.AppConfig) {
 }
 
 func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
+	td.Flash = app.SessionManager.PopString(r.Context(), "flash")
+	td.Warning = app.SessionManager.PopString(r.Context(), "warning")
+	td.Error = app.SessionManager.PopString(r.Context(), "error")
 	td.CSRFToken = nosurf.Token(r)
 	return td
 }
@@ -35,7 +38,7 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *mod
 	}
 	t, ok := tc[tmpl]
 	if !ok {
-		log.Fatal("can not get template", tmpl)
+		log.Fatal("can not get template ", tmpl)
 	}
 	buffer := new(bytes.Buffer)
 	td = AddDefaultData(td, r)

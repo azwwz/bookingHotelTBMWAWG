@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/forms"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
 )
@@ -86,5 +87,50 @@ func (repo *Repository) Contact(w http.ResponseWriter, r *http.Request) {
 }
 
 func (repo *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "make-reservation.page.html", &models.TemplateData{})
+	render.RenderTemplate(w, r, "make-reservation.page.html", &models.TemplateData{
+		Form: &forms.Form{},
+	})
+}
+
+func (repo *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	form := forms.NewForm(r.PostForm)
+	form.Require("first_name", "last_name", "email", "phone")
+	form.Minimum("first_name", 3)
+	form.IsEmail("email")
+	reversation := &models.Reservation{
+		First_name: r.Form.Get("first_name"),
+		Last_name:  r.Form.Get("last_name"),
+		Email:      r.Form.Get("email"),
+		Phone:      r.Form.Get("phone"),
+	}
+	if !form.Valid() {
+		render.RenderTemplate(w, r, "make-reservation.page.html", &models.TemplateData{
+			Form: form,
+		})
+		return
+	}
+	repo.App.SessionManager.Put(r.Context(), "reservation", reversation)
+	http.Redirect(w, r, "/reservation-summary", http.StatusSeeOther)
+}
+
+func (repo *Repository) ReservationSummary(w http.ResponseWriter, r *http.Request) {
+	reservation, ok := repo.App.SessionManager.Get(r.Context(), "reservation").(models.Reservation)
+	if !ok {
+		log.Println("cannot get item form session")
+		repo.App.SessionManager.Put(r.Context(), "error", "can not get item from session")
+		http.Redirect(w, r, "/", http.StatusMovedPermanently)
+		return
+	}
+	repo.App.SessionManager.Remove(r.Context(), "reservation")
+	data := make(map[string]interface{})
+	data["reservation"] = reservation
+	render.RenderTemplate(w, r, "reservation-summary.page.html", &models.TemplateData{
+		Data: data,
+	})
 }
