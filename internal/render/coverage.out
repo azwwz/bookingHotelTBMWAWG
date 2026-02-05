@@ -1,0 +1,25 @@
+mode: set
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:22.40,25.2 1 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:27.84,33.2 5 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:35.105,37.18 2 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:37.18,39.3 1 0
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:39.8,41.17 2 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:41.17,43.4 1 0
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:45.2,46.9 2 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:46.9,49.3 2 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:50.2,53.16 4 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:53.16,56.3 2 0
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:57.2,58.16 2 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:58.16,61.3 2 0
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:62.2,62.12 1 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:68.67,73.16 3 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:73.16,75.3 1 0
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:76.2,77.16 2 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:77.16,79.3 1 0
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:80.2,80.29 1 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:80.29,83.17 3 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:83.17,85.4 1 0
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:87.3,88.17 2 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:88.17,90.4 1 0
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:92.3,92.21 1 1
+github.com/azwwz/bookingHotelTBMWAWG/internal/render/render.go:94.2,94.21 1 1
