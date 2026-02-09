@@ -10,7 +10,7 @@ import (
 
 var app *config.AppConfig
 
-func NewHepler(a *config.AppConfig) {
+func NewHelper(a *config.AppConfig) {
 	app = a
 }
 
