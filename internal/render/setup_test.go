@@ -1,6 +1,7 @@
 package render
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"testing"
@@ -22,6 +23,13 @@ func setup() {
 	app = &config.AppConfig{}
 
 	app.InProduction = false
+
+	// config appConfig log.logger
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	app.InfoLog = infoLog
+
+	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	app.ErrorLog = errorLog
 
 	sessionManager = scs.New()
 	sessionManager.Lifetime = 24 * time.Hour
