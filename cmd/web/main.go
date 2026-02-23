@@ -2,16 +2,15 @@ package main
 
 import (
 	"encoding/gob"
-	"log"
-	"net/http"
-	"os"
-	"time"
-
 	"github.com/alexedwards/scs/v2"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/handlers"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
+	"log"
+	"net/http"
+	"os"
+	"time"
 )
 
 var sessionManager *scs.SessionManager
@@ -57,6 +56,9 @@ func run() error {
 	sessionManager.Cookie.Secure = app.InProduction
 
 	app.SessionManager = sessionManager
+
+	// new database connection
+	driver.ConnectSQL
 
 	// let handler use the app config
 	repo := handlers.NewRepo(app)

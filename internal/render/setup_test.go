@@ -29,7 +29,7 @@ func setup() {
 	app.InfoLog = infoLog
 
 	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-	app.ErrorLog = errorLog
+	app.ErrorLog = errorLog		
 
 	sessionManager = scs.New()
 	sessionManager.Lifetime = 24 * time.Hour
