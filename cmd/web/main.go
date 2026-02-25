@@ -2,25 +2,29 @@ package main
 
 import (
 	"encoding/gob"
-	"github.com/alexedwards/scs/v2"
-	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
-	"github.com/azwwz/bookingHotelTBMWAWG/internal/handlers"
-	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
-	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/alexedwards/scs/v2"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/driver"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/handlers"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/repository/dbrepo"
 )
 
 var sessionManager *scs.SessionManager
 var app *config.AppConfig
 
 func main() {
-	err := run()
+	db, err := run()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.SQL.Close()
 	// start the server
 	srv := &http.Server{
 		Addr:    ":8080",
@@ -33,8 +37,13 @@ func main() {
 	}
 }
 
-func run() error {
+func run() (*driver.DB, error) {
+
+	// what am I going to put in the session
 	gob.Register(models.Reservation{})
+	gob.Register(models.User{})
+	gob.Register(models.Room{})
+	gob.Register(models.RoomRestrictions{})
 
 	// create golbal app config
 	app = &config.AppConfig{}
@@ -58,21 +67,26 @@ func run() error {
 	app.SessionManager = sessionManager
 
 	// new database connection
-	driver.ConnectSQL
+	log.Println("conecting to database ... ")
+	dbconn, err := driver.ConnectSQL("host=localhost port=5432 dbname=bookings user=postgres password=123456")
+	if err != nil {
+		return nil, err
+	}
 
+	dbrepo := dbrepo.NewPostgresDBRepo(dbconn.SQL, app)
 	// let handler use the app config
-	repo := handlers.NewRepo(app)
+	repo := handlers.NewRepo(app, dbrepo)
 	handlers.SetRepo(repo)
 
 	// let render package  use the app config
-	render.NewTemplates(app)
+	render.NewRender(app)
 
 	// create template cache bind to the app config
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	app.TemplateCache = tc
 	app.UseCache = false
-	return nil
+	return dbconn, nil
 }

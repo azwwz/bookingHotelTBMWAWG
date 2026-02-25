@@ -10,17 +10,20 @@ import (
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/helpers"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/repository"
 )
 
 var Repo *Repository
 
 type Repository struct {
 	App *config.AppConfig
+	DB  repository.DatabaseRepo
 }
 
-func NewRepo(a *config.AppConfig) *Repository {
+func NewRepo(a *config.AppConfig, d repository.DatabaseRepo) *Repository {
 	return &Repository{
 		App: a,
+		DB:  d,
 	}
 }
 
@@ -29,23 +32,23 @@ func SetRepo(r *Repository) {
 }
 
 func (repo *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "home.page.html", &models.TemplateData{})
+	render.Template(w, r, "home.page.html", &models.TemplateData{})
 }
 
 func (repo *Repository) About(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "about.page.html", &models.TemplateData{})
+	render.Template(w, r, "about.page.html", &models.TemplateData{})
 }
 
 func (repo *Repository) Generals(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "generals.page.html", &models.TemplateData{})
+	render.Template(w, r, "generals.page.html", &models.TemplateData{})
 }
 
 func (repo *Repository) Majors(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "majors.page.html", &models.TemplateData{})
+	render.Template(w, r, "majors.page.html", &models.TemplateData{})
 }
 
 func (repo *Repository) Availability(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "search-availability.page.html", &models.TemplateData{})
+	render.Template(w, r, "search-availability.page.html", &models.TemplateData{})
 }
 
 func (repo *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
@@ -75,11 +78,11 @@ func (repo *Repository) AvailabilityJson(w http.ResponseWriter, r *http.Request)
 }
 
 func (repo *Repository) Contact(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "contact.page.html", &models.TemplateData{})
+	render.Template(w, r, "contact.page.html", &models.TemplateData{})
 }
 
 func (repo *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "make-reservation.page.html", &models.TemplateData{
+	render.Template(w, r, "make-reservation.page.html", &models.TemplateData{
 		Form: &forms.Form{},
 	})
 }
@@ -102,7 +105,7 @@ func (repo *Repository) PostReservation(w http.ResponseWriter, r *http.Request) 
 		Phone:      r.Form.Get("phone"),
 	}
 	if !form.Valid() {
-		render.RenderTemplate(w, r, "make-reservation.page.html", &models.TemplateData{
+		render.Template(w, r, "make-reservation.page.html", &models.TemplateData{
 			Form: form,
 		})
 		return
@@ -122,7 +125,7 @@ func (repo *Repository) ReservationSummary(w http.ResponseWriter, r *http.Reques
 	repo.App.SessionManager.Remove(r.Context(), "reservation")
 	data := make(map[string]interface{})
 	data["reservation"] = reservation
-	render.RenderTemplate(w, r, "reservation-summary.page.html", &models.TemplateData{
+	render.Template(w, r, "reservation-summary.page.html", &models.TemplateData{
 		Data: data,
 	})
 }
