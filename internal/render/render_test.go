@@ -31,12 +31,12 @@ func TestRenderTemplate(t *testing.T) {
 		t.Error(err)
 	}
 	mywriter := myWriter{}
-	err = RenderTemplate(&mywriter, r, "home.page.html", &models.TemplateData{})
+	err = Template(&mywriter, r, "home.page.html", &models.TemplateData{})
 	if err != nil {
 		t.Error("error writing template to browser", err)
 	}
 
-	err = RenderTemplate(&mywriter, r, "non-existent.page.tmpl", &models.TemplateData{})
+	err = Template(&mywriter, r, "non-existent.page.tmpl", &models.TemplateData{})
 	if err == nil {
 		t.Error("rendered template that does not exist")
 	}

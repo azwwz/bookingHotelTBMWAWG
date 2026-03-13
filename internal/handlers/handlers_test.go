@@ -1,10 +1,14 @@
 package handlers
 
 import (
+	"context"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"time"
 )
 
 type postData struct {
@@ -58,6 +62,7 @@ func TestHanlders(t *testing.T) {
 			values := url.Values{}
 			for _, p := range e.params {
 				values.Add(p.key, p.value)
+				log.Printf(" values.Add(%v,%v)\n ", p.key, p.value)
 			}
 			resp, err := server.Client().PostForm(server.URL+e.url, values)
 			if err != nil {
@@ -68,4 +73,28 @@ func TestHanlders(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestRepository_Reservation(t *testing.T) {
+	reservation := models.Reservation{
+		RoomID:    1,
+		StartDate: time.Now(),
+		EndDate:   time.Now(),
+	}
+	request, _ := http.NewRequest("GET", "/make-reservation", nil)
+	ctx := getCtx(request)
+	request = request.WithContext(ctx)
+	sessionManager.Put(request.Context(), "reservation", reservation)
+	recorder := httptest.NewRecorder()
+	handlerFunc := http.HandlerFunc(Repo.Reservation)
+	handlerFunc.ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusOK {
+		t.Errorf("Reservation handler returned wrong response code: got -> %d, wanted-> %d", recorder.Code, http.StatusOK)
+	}
+}
+
+func getCtx(r *http.Request) context.Context {
+	ctx, _ := sessionManager.Load(r.Context(), r.Header.Get("X-Session any word"))
+
+	return ctx
 }

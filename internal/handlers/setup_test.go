@@ -3,6 +3,12 @@ package handlers
 import (
 	"encoding/gob"
 	"fmt"
+	"github.com/alexedwards/scs/v2"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
+	"github.com/go-chi/chi/v5"
+	"github.com/justinas/nosurf"
 	"html/template"
 	"log"
 	"net/http"
@@ -10,16 +16,32 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
-
-	"github.com/alexedwards/scs/v2"
-	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
-	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
-	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
-	"github.com/go-chi/chi/v5"
-	"github.com/justinas/nosurf"
 )
 
 func TestMain(m *testing.M) {
+	gob.Register(models.Reservation{})
+	app = &config.AppConfig{}
+	app.InProduction = false
+	// config appConfig log.logger
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	app.InfoLog = infoLog
+	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	app.ErrorLog = errorLog
+	sessionManager = scs.New()
+	sessionManager.Lifetime = 24 * time.Hour
+	sessionManager.Cookie.Persist = true
+	sessionManager.Cookie.SameSite = http.SameSiteLaxMode
+	sessionManager.Cookie.Secure = app.InProduction
+	app.SessionManager = sessionManager
+	app.UseCache = true
+	tc, err := CreateTemplateCache()
+	if err != nil {
+		log.Fatal(err)
+	}
+	app.TemplateCache = tc
+	Repo = TestNewRepo(app)
+	render.NewRender(app)
+
 	os.Exit(m.Run())
 }
 
@@ -29,36 +51,6 @@ var pathToTemplate = "../.."
 var functions template.FuncMap
 
 func getRoutes() http.Handler {
-	gob.Register(models.Reservation{})
-
-	app = &config.AppConfig{}
-	app.InProduction = false
-
-	// config appConfig log.logger
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	app.InfoLog = infoLog
-
-	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-	app.ErrorLog = errorLog
-
-	sessionManager = scs.New()
-	sessionManager.Lifetime = 24 * time.Hour
-	sessionManager.Cookie.Persist = true
-	sessionManager.Cookie.SameSite = http.SameSiteLaxMode
-	sessionManager.Cookie.Secure = app.InProduction
-
-	app.SessionManager = sessionManager
-
-	app.UseCache = true
-	tc, err := CreateTemplateCache()
-	if err != nil {
-		log.Fatal(err)
-	}
-	app.TemplateCache = tc
-
-	Repo = NewRepo(app)
-
-	render.NewTemplates(app)
 
 	r := chi.NewRouter()
 	// r.Use(NoSurf)

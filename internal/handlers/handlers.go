@@ -3,6 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/repository/dbrepo"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -27,6 +29,13 @@ func NewRepo(a *config.AppConfig, d repository.DatabaseRepo) *Repository {
 	return &Repository{
 		App: a,
 		DB:  d,
+	}
+}
+
+func TestNewRepo(a *config.AppConfig) *Repository {
+	return &Repository{
+		App: a,
+		DB:  dbrepo.TestNewPostgresDBRepo(a),
 	}
 }
 
@@ -55,8 +64,10 @@ func (repo *Repository) Availability(w http.ResponseWriter, r *http.Request) {
 }
 
 func (repo *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
+	_ = r.ParseForm()
 	sd := r.Form.Get("start")
 	ed := r.Form.Get("end")
+	log.Printf("sd ed is  %v %v", sd, ed)
 	// time : 01/02 03:04:05PM '06 -0700 Mon Jan
 	layout := "2006-1-2"
 	startData, err := time.Parse(layout, sd)
