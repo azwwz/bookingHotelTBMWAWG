@@ -6,8 +6,20 @@
         <div class="col">
             <h1 class="mt-3">Make Reservation</h1>
             {{$FromValues := .Form.Values}}
+            {{$res := index .Data "reservation"}}
+            <div><strong>Reservation Details</strong></div>
+                <div>RoomName: {{$res.Room.RoomName}}</div>
+                <div>Arrival: {{index .StringMap "StartData"}}</div>
+                <div>Departure: {{index .StringMap "EndData"}}</div>
             <form method="post" action="" class="" novalidate>
+            
+
                 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                <input type="hidden" name="start_data" value="{{index .StringMap "StartData"}}">
+                <input type="hidden" name="end_data" value="{{index .StringMap "EndData"}}">
+                <input type="hidden" name="room_id" value="{{$res.RoomID}}">
+
+
                 <div class="form-group mt-3">
                     <label for="first_name">First Name:</label>
                     {{with .Form.Errors.Get "first_name"}}
@@ -27,6 +39,18 @@
                     <input class="form-control {{with .Form.Errors.Get "last_name"}} is-invalid{{end}}" id="last_name"
                         autocomplete="off" type='text' name='last_name' value="{{.Form.Values.Get "last_name"}}" required>
                 </div>
+<!-- 
+                <div class="form-group">
+                    <label for="start_data">Start Data</label>
+                    <input type="text" name="start_data" id="start_data" class="form-control">
+                </div>
+
+                 <div class="form-group">
+                    <label for="end_data">End Data</label>
+                    <input type="text" name="end_data" id="end_data" class="form-control">
+                </div> -->
+
+                <!-- <input type="hidden" name="room_id" value="1"> -->
 
                 <div class="form-group">
                     <label for="email">Email:</label>

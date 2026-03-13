@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict jcUou4PHETI1M9ll0bdSMcudbC42ZCXyX1goEY5S4lJwhzfEOJcWzV0kbJ5lve0
+\restrict KAhMMB5g9QjQvlNdfy6pKSDH1YPJZfO4W0NQWyueJKEjnT1PEOY8Y426K5JRsVF
 
 -- Dumped from database version 18.1
 -- Dumped by pg_dump version 18.1
@@ -110,7 +110,7 @@ CREATE TABLE public.room_restrictions (
     start_date date NOT NULL,
     end_date date NOT NULL,
     room_id integer NOT NULL,
-    reservation_id integer NOT NULL,
+    reservation_id integer,
     restriction_id integer NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -189,6 +189,41 @@ CREATE TABLE public.schema_migration (
 ALTER TABLE public.schema_migration OWNER TO postgres;
 
 --
+-- Name: test_users; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.test_users (
+    first_name character varying(255),
+    last_name character varying(255),
+    id integer NOT NULL
+);
+
+
+ALTER TABLE public.test_users OWNER TO postgres;
+
+--
+-- Name: test_users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.test_users_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.test_users_id_seq OWNER TO postgres;
+
+--
+-- Name: test_users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.test_users_id_seq OWNED BY public.test_users.id;
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -257,6 +292,13 @@ ALTER TABLE ONLY public.rooms ALTER COLUMN id SET DEFAULT nextval('public.rooms_
 
 
 --
+-- Name: test_users id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.test_users ALTER COLUMN id SET DEFAULT nextval('public.test_users_id_seq'::regclass);
+
+
+--
 -- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -301,6 +343,14 @@ ALTER TABLE ONLY public.rooms
 
 ALTER TABLE ONLY public.schema_migration
     ADD CONSTRAINT schema_migration_pkey PRIMARY KEY (version);
+
+
+--
+-- Name: test_users test_users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.test_users
+    ADD CONSTRAINT test_users_pkey PRIMARY KEY (id);
 
 
 --
@@ -396,5 +446,5 @@ ALTER TABLE ONLY public.room_restrictions
 -- PostgreSQL database dump complete
 --
 
-\unrestrict jcUou4PHETI1M9ll0bdSMcudbC42ZCXyX1goEY5S4lJwhzfEOJcWzV0kbJ5lve0
+\unrestrict KAhMMB5g9QjQvlNdfy6pKSDH1YPJZfO4W0NQWyueJKEjnT1PEOY8Y426K5JRsVF
 

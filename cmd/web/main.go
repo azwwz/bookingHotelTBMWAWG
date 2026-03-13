@@ -11,6 +11,7 @@ import (
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/driver"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/handlers"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/helpers"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/repository/dbrepo"
@@ -43,7 +44,7 @@ func run() (*driver.DB, error) {
 	gob.Register(models.Reservation{})
 	gob.Register(models.User{})
 	gob.Register(models.Room{})
-	gob.Register(models.RoomRestrictions{})
+	gob.Register(models.RoomRestriction{})
 
 	// create golbal app config
 	app = &config.AppConfig{}
@@ -56,6 +57,9 @@ func run() (*driver.DB, error) {
 
 	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 	app.ErrorLog = errorLog
+
+	// init helper's app
+	helpers.NewHelper(app)
 
 	// session manager create bind to the app config
 	sessionManager = scs.New()
