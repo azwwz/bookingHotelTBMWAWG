@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/alexedwards/scs/v2"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/helpers"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
 	"github.com/go-chi/chi/v5"
@@ -34,6 +35,8 @@ func TestMain(m *testing.M) {
 	sessionManager.Cookie.Secure = app.InProduction
 	app.SessionManager = sessionManager
 	app.UseCache = true
+	// init helper's app
+	helpers.NewHelper(app)
 	tc, err := CreateTemplateCache()
 	if err != nil {
 		log.Fatal(err)
