@@ -45,6 +45,12 @@ func TestMain(m *testing.M) {
 	Repo = TestNewRepo(app)
 	render.NewRender(app)
 
+	mailChan := make(chan models.MailData)
+	app.MailChan = mailChan
+	defer close(app.MailChan)
+
+	listenForMail()
+
 	os.Exit(m.Run())
 }
 
@@ -56,8 +62,8 @@ var functions template.FuncMap
 func getRoutes() http.Handler {
 
 	r := chi.NewRouter()
-	// r.Use(NoSurf)
 	r.Use(SessionLoad)
+	// r.Use(NoSurf)
 	r.Get("/", Repo.Home)
 	r.Get("/about", Repo.About)
 	r.Get("/generals", Repo.Generals)
@@ -67,6 +73,8 @@ func getRoutes() http.Handler {
 	r.Get("/search-availability", Repo.Availability)
 	r.Post("/search-availability", Repo.PostAvailability)
 	r.Post("/search-availability-json", Repo.AvailabilityJson)
+	r.Get("/choose-room/{id}", Repo.ChooseRoom)
+	r.Get("/book-room", Repo.BookRoom)
 
 	r.Get("/make-reservation", Repo.Reservation)
 	r.Post("/make-reservation", Repo.PostReservation)
@@ -123,4 +131,12 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 		myCache[name] = ts
 	}
 	return myCache, nil
+}
+
+func listenForMail() {
+	go func() {
+		for {
+			_ = <-app.MailChan
+		}
+	}()
 }

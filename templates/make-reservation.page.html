@@ -9,14 +9,14 @@
             {{$res := index .Data "reservation"}}
             <div><strong>Reservation Details</strong></div>
                 <div>RoomName: {{$res.Room.RoomName}}</div>
-                <div>Arrival: {{index .StringMap "StartData"}}</div>
-                <div>Departure: {{index .StringMap "EndData"}}</div>
+                <div>Arrival: {{index .StringMap "StartDate"}}</div>
+                <div>Departure: {{index .StringMap "EndDate"}}</div>
             <form method="post" action="" class="" novalidate>
             
 
                 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-                <input type="hidden" name="start_data" value="{{index .StringMap "StartData"}}">
-                <input type="hidden" name="end_data" value="{{index .StringMap "EndData"}}">
+                <input type="hidden" name="start_date" value="{{index .StringMap "StartDate"}}">
+                <input type="hidden" name="end_date" value="{{index .StringMap "EndDate"}}">
                 <input type="hidden" name="room_id" value="{{$res.RoomID}}">
 
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/repository/dbrepo"
+	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
 	"time"
@@ -13,7 +14,6 @@ import (
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/repository"
-	"github.com/go-chi/chi/v5"
 )
 
 var Repo *Repository
@@ -67,20 +67,20 @@ func (repo *Repository) PostAvailability(w http.ResponseWriter, r *http.Request)
 	ed := r.Form.Get("end")
 	// time : 01/02 03:04:05PM '06 -0700 Mon Jan
 	layout := "2006-1-2"
-	startData, err := time.Parse(layout, sd)
+	startDate, err := time.Parse(layout, sd)
 	if err != nil {
 		repo.App.SessionManager.Put(r.Context(), "error", "cannot  time.Parse(layout, sd)")
 		http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		return
 	}
-	endData, err := time.Parse(layout, ed)
+	endDate, err := time.Parse(layout, ed)
 	if err != nil {
 		repo.App.SessionManager.Put(r.Context(), "error", "cannot time.Parse(layout, ed)")
 		http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		return
 	}
 
-	rooms, err := repo.DB.SearchAvailabilityForAllRooms(startData, endData)
+	rooms, err := repo.DB.SearchAvailabilityForAllRooms(startDate, endDate)
 	if err != nil {
 		repo.App.SessionManager.Put(r.Context(), "error", "cannot SearchAvailabilityForAllRooms")
 		http.Redirect(w, r, "/", http.StatusMovedPermanently)
@@ -98,15 +98,20 @@ func (repo *Repository) PostAvailability(w http.ResponseWriter, r *http.Request)
 	data["rooms"] = rooms
 
 	res := models.Reservation{
-		StartDate: startData,
-		EndDate:   endData,
+		StartDate: startDate,
+		EndDate:   endDate,
 	}
 
 	repo.App.SessionManager.Put(r.Context(), "reservation", res)
 
-	render.Template(w, r, "choose-room.page.html", &models.TemplateData{
+	err = render.Template(w, r, "choose-room.page.html", &models.TemplateData{
 		Data: data,
 	})
+	if err != nil {
+		repo.App.SessionManager.Put(r.Context(), "error", "cannot render")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
 }
 
 type jsonAvailabilityJson struct {
@@ -187,8 +192,8 @@ func (repo *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 	ed := res.EndDate.Format("2006-01-02")
 
 	stringMap := make(map[string]string)
-	stringMap["StartData"] = sd
-	stringMap["EndData"] = ed
+	stringMap["StartDate"] = sd
+	stringMap["EndDate"] = ed
 
 	room, err := repo.DB.GetRoomByID(res.RoomID)
 	if err != nil {
@@ -212,6 +217,7 @@ func (repo *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// PostReservation post reservation form and turn to reservation summery
 func (repo *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -242,13 +248,23 @@ func (repo *Repository) PostReservation(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// get roomID
 	roomID, err := strconv.Atoi(r.Form.Get("room_id"))
 	if err != nil {
 		repo.App.SessionManager.Put(r.Context(), "error", "invalid data!")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
+	// from roomID get room
+	room, err := repo.DB.GetRoomByID(roomID)
+	if err != nil {
+		repo.App.SessionManager.Put(r.Context(), "error", "cannot get Room by ID")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
 
+	}
+
+	// add all to reservation for reservation summery
 	reservation := models.Reservation{
 		FirstName: r.Form.Get("first_name"),
 		LastName:  r.Form.Get("last_name"),
@@ -257,18 +273,24 @@ func (repo *Repository) PostReservation(w http.ResponseWriter, r *http.Request) 
 		StartDate: startDate,
 		EndDate:   endDate,
 		RoomID:    roomID,
+		Room:      room,
 	}
 
 	if !form.Valid() {
 		data := make(map[string]interface{})
 		data["reservation"] = reservation
-		render.Template(w, r, "make-reservation.page.html", &models.TemplateData{
+		err := render.Template(w, r, "make-reservation.page.html", &models.TemplateData{
 			Form: form,
 			Data: data,
 		})
+		if err != nil {
+			repo.App.SessionManager.Put(r.Context(), "error", "error rendering template")
+			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+			return
+		}
 		return
 	}
-	// after check the valid, stroe into database
+	// after check the valid, store into database
 
 	// Test  repo.DB.InsertReservation(reservation) failed
 	reservation.ID, err = repo.DB.InsertReservation(reservation)
@@ -293,6 +315,22 @@ func (repo *Repository) PostReservation(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	htmlMessage := fmt.Sprintf(`
+		<strong>Reservation Confirmation</strong><br>
+		Dear %s :,<br>
+		This is confirm your reservation from %s to %s .`,
+		reservation.FirstName, reservation.StartDate.Format("2006-01-02"), reservation.EndDate.Format("2006-01-02"))
+
+	msg := models.MailData{
+		To:       "yue@yue.com",
+		From:     "19704769@qq.com",
+		Subject:  "Reservation Confirmation",
+		Content:  htmlMessage,
+		Template: "basic.html",
+	}
+
+	repo.App.MailChan <- msg
+
 	repo.App.SessionManager.Put(r.Context(), "reservation", reservation)
 	http.Redirect(w, r, "/reservation-summary", http.StatusSeeOther)
 }
@@ -314,15 +352,20 @@ func (repo *Repository) ReservationSummary(w http.ResponseWriter, r *http.Reques
 	stringMap["start_date"] = sd
 	stringMap["end_date"] = ed
 
-	render.Template(w, r, "reservation-summary.page.html", &models.TemplateData{
+	err := render.Template(w, r, "reservation-summary.page.html", &models.TemplateData{
 		Data:      data,
 		StringMap: stringMap,
 	})
+	if err != nil {
+		repo.App.SessionManager.Put(r.Context(), "error", "error rendering template")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
 }
 
 // ChooseRoom receive a room_id and return to /make-reservation page with reservation and room info
 func (repo *Repository) ChooseRoom(w http.ResponseWriter, r *http.Request) {
-	roomID, err := strconv.Atoi(chi.URLParam(r, "room_id"))
+	roomID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		repo.App.SessionManager.Put(r.Context(), "error", "can not get URLParam")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -372,4 +415,10 @@ func (repo *Repository) BookRoom(w http.ResponseWriter, r *http.Request) {
 
 	repo.App.SessionManager.Put(r.Context(), "reservation", res)
 	http.Redirect(w, r, "/make-reservation", http.StatusSeeOther)
+}
+
+func (repo *Repository) ShowLogin(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "login.page.html", &models.TemplateData{
+		Form: forms.NewForm(nil),
+	})
 }

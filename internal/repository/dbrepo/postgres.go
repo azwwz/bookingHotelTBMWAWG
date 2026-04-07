@@ -68,8 +68,8 @@ func (p *postgresDBRepo) InsertRoomRestriction(r models.RoomRestriction) error {
 
 // SearchAvailabilityByDatesByRoomID return true if there is availability rooms exits, and false if no availability exits
 func (p *postgresDBRepo) SearchAvailabilityByDatesByRoomID(roomId int, start, end time.Time) (bool, error) {
-	ctx, cancle := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancle()
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
 	var numRows int
 	stmt := `
@@ -100,16 +100,16 @@ func (p *postgresDBRepo) SearchAvailabilityByDatesByRoomID(roomId int, start, en
 
 // SearchAvailabilityForAllRooms return a slice of available rooms, if any , for given data range
 func (p *postgresDBRepo) SearchAvailabilityForAllRooms(start, end time.Time) ([]models.Room, error) {
-	ctx, cancle := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancle()
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
 	var rooms []models.Room
 	stmt := `
 		select r.id ,r.room_name from rooms r 
 		where r.id not in (
-			select rr.id from room_restrictions rr 
-				where $1 < rr.end_date 
-				and $2 >rr.start_date
+			select rr.room_id from room_restrictions rr 
+				where $1 <= rr.end_date 
+				and $2 >= rr.start_date
 			)
 	`
 	rows, err := p.DB.QueryContext(ctx, stmt,
@@ -141,8 +141,8 @@ func (p *postgresDBRepo) SearchAvailabilityForAllRooms(start, end time.Time) ([]
 
 // GetRoomByID get room by id
 func (p *postgresDBRepo) GetRoomByID(id int) (models.Room, error) {
-	ctx, cancle := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancle()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
 
 	var room models.Room
 	stmt := `
@@ -155,4 +155,52 @@ func (p *postgresDBRepo) GetRoomByID(id int) (models.Room, error) {
 		return room, err
 	}
 	return room, nil
+}
+
+// GetUserByID __
+func (p *postgresDBRepo) GetUserByID(id int) (models.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	var user models.User
+
+	query := `select id, first_name,last_name, email, password, access_level, created_at, updated_at 
+				from users where id = $1`
+
+	err := p.DB.QueryRowContext(ctx, query, id).Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.Password,
+		&user.AccessLevel,
+		&user.CreatedAt,
+		&user.UpdatedAt)
+	if err != nil {
+		return user, err
+	}
+	return user, nil
+
+}
+
+// UpdaterUser __
+func (p *postgresDBRepo) UpdaterUser(u models.User) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	query := `update users set first_name = $1,last_name = $2, email = $3, access_level = $4,  updated_at = $5
+				where id = $6`
+
+	_, err := p.DB.ExecContext(ctx, query,
+		u.FirstName,
+		u.LastName,
+		u.Email,
+		u.AccessLevel,
+		time.Now(),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

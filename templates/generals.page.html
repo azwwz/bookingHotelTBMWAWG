@@ -40,6 +40,6 @@
 
 {{define "js"}}
 <script>
-    generalAndMajors("1")
+    generalAndMajors({r_id:"1",csrf:"{{.CSRFToken}}"})
 </script>
 {{end}}

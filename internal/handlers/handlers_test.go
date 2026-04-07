@@ -82,7 +82,7 @@ func TestRepository_PostAvailability(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v", recorder.Code, http.StatusOK)
 	}
 
-	// 2. startData, err := time.Parse(layout, sd)
+	// 2. startDate, err := time.Parse(layout, sd)
 	values = url.Values{}
 	values.Add("start", "invalid")
 	values.Add("end", "2050-01-02")
@@ -115,7 +115,7 @@ func TestRepository_PostAvailability(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v", recorder.Code, http.StatusMovedPermanently)
 	}
 
-	// 3 . rooms, err := repo.DB.SearchAvailabilityForAllRooms(startData, endData)
+	// 3 . rooms, err := repo.DB.SearchAvailabilityForAllRooms(startDate, endDate)
 	values = url.Values{}
 	values.Add("start", "2050-01-01")
 	values.Add("end", "2050-01-03")
@@ -481,7 +481,7 @@ func TestRepository_ChooseRoom(t *testing.T) {
 
 	// add chi URLParam
 	routeContext := chi.NewRouteContext()
-	routeContext.URLParams.Add("room_id", "1")
+	routeContext.URLParams.Add("id", "1")
 	chiCtx := context.WithValue(request.Context(), chi.RouteCtxKey, routeContext)
 	request = request.WithContext(chiCtx)
 
@@ -494,13 +494,13 @@ func TestRepository_ChooseRoom(t *testing.T) {
 		t.Errorf("handler returned wrong response code: got -> %d, wanted-> %d", rr.Code, http.StatusSeeOther)
 	}
 
-	// test  roomID, err := strconv.Atoi(chi.URLParam(r, "room_id"))
+	// test  roomID, err := LParam(r, "id"))
 	request = httptest.NewRequest("GET", "/choose-room/1", nil)
 	request = request.WithContext(getCtx(request))
 
 	// add chi URLParam
 	routeContext = chi.NewRouteContext()
-	routeContext.URLParams.Add("room_id", "")
+	routeContext.URLParams.Add("id", "")
 	chiCtx = context.WithValue(request.Context(), chi.RouteCtxKey, routeContext)
 	request = request.WithContext(chiCtx)
 
@@ -518,7 +518,7 @@ func TestRepository_ChooseRoom(t *testing.T) {
 
 	// add chi URLParam
 	routeContext = chi.NewRouteContext()
-	routeContext.URLParams.Add("room_id", "1")
+	routeContext.URLParams.Add("id", "1")
 	chiCtx = context.WithValue(request.Context(), chi.RouteCtxKey, routeContext)
 	request = request.WithContext(chiCtx)
 

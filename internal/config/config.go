@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
 	"html/template"
 	"log"
 
@@ -16,4 +17,5 @@ type AppConfig struct {
 	CSRFToken      string
 	InfoLog        *log.Logger
 	ErrorLog       *log.Logger
+	MailChan       chan models.MailData
 }

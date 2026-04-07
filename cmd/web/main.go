@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/gob"
 	"log"
 	"net/http"
@@ -25,7 +26,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.SQL.Close()
+
+	defer func(SQL *sql.DB) {
+		err := SQL.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(db.SQL)
+
+	defer close(app.MailChan)
+
+	listenForMail()
+
 	// start the server
 	srv := &http.Server{
 		Addr:    ":8080",
@@ -46,8 +58,11 @@ func run() (*driver.DB, error) {
 	gob.Register(models.Room{})
 	gob.Register(models.RoomRestriction{})
 
-	// create golbal app config
+	// create global app config
 	app = &config.AppConfig{}
+
+	mailChan := make(chan models.MailData)
+	app.MailChan = mailChan
 
 	app.InProduction = false
 
@@ -77,9 +92,9 @@ func run() (*driver.DB, error) {
 		return nil, err
 	}
 
-	dbrepo := dbrepo.NewPostgresDBRepo(dbconn.SQL, app)
+	dbRepo := dbrepo.NewPostgresDBRepo(dbconn.SQL, app)
 	// let handler use the app config
-	repo := handlers.NewRepo(app, dbrepo)
+	repo := handlers.NewRepo(app, dbRepo)
 	handlers.SetRepo(repo)
 
 	// let render package  use the app config
