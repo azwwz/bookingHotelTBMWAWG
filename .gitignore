@@ -1,4 +1,69 @@
-database.yml
-.idea
-q.md
+# Go编译产物和构建文件
+bookings
 bookings.exe
+*.test
+*.test.exe
+cmd/web/bookings
+cmd/web/*.exe
+
+# Go模块vendor目录（如果使用vendor模式）
+vendor/
+
+# 测试覆盖文件
+coverage.out
+coverage.html
+*.coverprofile
+internal/render/coverage.out
+internal/handlers/coverage.out
+internal/forms/coverage.out
+
+# 本地配置和敏感文件
+database.yml
+.env
+.env.local
+.env.*.local
+*.local
+
+# IDE和编辑器配置
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+*.bak
+
+# 操作系统垃圾文件
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+ehthumbs_vista.db
+
+# 临时文件和日志
+tmp/
+temp/
+log/
+*.log
+*.pid
+*.prof
+debug
+debug.*
+
+# 个人文件
+q.md
+
+# 数据库文件（SQLite等）
+*.db
+*.sqlite
+*.sqlite3
+
+# 其他构建产物
+dist/
+build/
+bin/
+pkg/
+
+# Go工作区文件
+go.work
+go.work.sum
