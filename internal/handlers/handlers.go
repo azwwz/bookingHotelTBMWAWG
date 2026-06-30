@@ -3,11 +3,16 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/azwwz/bookingHotelTBMWAWG/internal/repository/dbrepo"
-	"github.com/go-chi/chi/v5"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/helpers"
+
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/repository/dbrepo"
+	"github.com/go-chi/chi/v5"
 
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/forms"
@@ -211,7 +216,7 @@ func (repo *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 	data["reservation"] = res
 
 	render.Template(w, r, "make-reservation.page.html", &models.TemplateData{
-		Form:      &forms.Form{},
+		Form:      forms.NewForm(nil),
 		Data:      data,
 		StringMap: stringMap,
 	})
@@ -421,4 +426,130 @@ func (repo *Repository) ShowLogin(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "login.page.html", &models.TemplateData{
 		Form: forms.NewForm(nil),
 	})
+}
+
+func (repo *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
+	_ = repo.App.SessionManager.RenewToken(r.Context())
+
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+	}
+
+	email := r.Form.Get("email")
+	password := r.Form.Get("password")
+
+	form := forms.NewForm(r.PostForm)
+	form.Require("email", "password")
+	form.IsEmail("email")
+	if !form.Valid() {
+		render.Template(w, r, "login.page.html", &models.TemplateData{
+			Form: form,
+		})
+		return
+	}
+
+	id, _, err := repo.DB.Authenticate(email, password)
+	if err != nil {
+		log.Println(err)
+
+		repo.App.SessionManager.Put(r.Context(), "error", "authentication failed")
+		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+		return
+	}
+
+	repo.App.SessionManager.Put(r.Context(), "user_id", id)
+	repo.App.SessionManager.Put(r.Context(), "flash", "logged in successfully")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (repo *Repository) Logout(w http.ResponseWriter, r *http.Request) {
+	_ = repo.App.SessionManager.Destroy(r.Context())
+	_ = repo.App.SessionManager.RenewToken(r.Context())
+	repo.App.SessionManager.Put(r.Context(), "flash", "logged out")
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (repo *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "admin-dashboard.page.html", &models.TemplateData{})
+}
+
+// AdminNewReservations shows all new reservations in admin tool
+func (repo *Repository) AdminNewReservations(w http.ResponseWriter, r *http.Request) {
+	reservations, err := repo.DB.AllNewReservations()
+
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["reservations"] = reservations
+	render.Template(w, r, "admin-new-reservations.page.html", &models.TemplateData{
+		Data: data,
+	})
+}
+
+// AdminAllReservations shows all reservations in admin tool
+func (repo *Repository) AdminAllReservations(w http.ResponseWriter, r *http.Request) {
+	reservations, err := repo.DB.AllReservations()
+	if err != nil {
+		log.Println(err)
+	}
+
+	data := make(map[string]interface{})
+	data["reservations"] = reservations
+
+	render.Template(w, r, "admin-all-reservations.page.html", &models.TemplateData{
+		Data: data,
+	})
+}
+
+func (repo *Repository) AdminNewReservation(w http.ResponseWriter, r *http.Request) {
+	reservations, err := repo.DB.AllReservations()
+	if err != nil {
+		log.Println(err)
+	}
+
+	data := make(map[string]interface{})
+	data["reservations"] = reservations
+
+	render.Template(w, r, "admin-new-reservations.page.html", &models.TemplateData{
+		Data: data,
+	})
+
+}
+
+// AdminShowReservation shows a reservation in admin tool
+func (repo *Repository) AdminShowReservation(w http.ResponseWriter, r *http.Request) {
+	// get id from url use split
+	urlParts := strings.Split(r.URL.Path, "/")
+	id, err := strconv.Atoi(urlParts[len(urlParts)-1])
+	if err != nil {
+		log.Println(err)
+	}
+	// create map save src
+	src := urlParts[len(urlParts)-2]
+	stringMap := make(map[string]string)
+	stringMap["src"] = src
+	// get reservation by id
+	reservation, err := repo.DB.GetReservationByID(id)
+	if err != nil {
+		log.Println(err)
+	}
+	//create data save reservation
+	data := make(map[string]interface{})
+	data["reservation"] = reservation
+
+	render.Template(w, r, "admin-reservation-show.page.html", &models.TemplateData{
+		Form:      forms.NewForm(nil),
+		StringMap: stringMap,
+		Data:      data,
+	})
+}
+
+// AdminReservationsCalendar shows all reservations in admin tool calendar view
+func (repo *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "admin-reservations-calendar.page.html", &models.TemplateData{})
 }

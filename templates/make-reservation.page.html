@@ -8,7 +8,7 @@
             {{$FromValues := .Form.Values}}
             {{$res := index .Data "reservation"}}
             <div><strong>Reservation Details</strong></div>
-                <div>RoomName: {{$res.Room.RoomName}}</div>
+                <div>Name: {{$res.Room.RoomName}}</div>
                 <div>Arrival: {{index .StringMap "StartDate"}}</div>
                 <div>Departure: {{index .StringMap "EndDate"}}</div>
             <form method="post" action="" class="" novalidate>
@@ -39,18 +39,6 @@
                     <input class="form-control {{with .Form.Errors.Get "last_name"}} is-invalid{{end}}" id="last_name"
                         autocomplete="off" type='text' name='last_name' value="{{.Form.Values.Get "last_name"}}" required>
                 </div>
-<!-- 
-                <div class="form-group">
-                    <label for="start_data">Start Data</label>
-                    <input type="text" name="start_data" id="start_data" class="form-control">
-                </div>
-
-                 <div class="form-group">
-                    <label for="end_data">End Data</label>
-                    <input type="text" name="end_data" id="end_data" class="form-control">
-                </div> -->
-
-                <!-- <input type="hidden" name="room_id" value="1"> -->
 
                 <div class="form-group">
                     <label for="email">Email:</label>

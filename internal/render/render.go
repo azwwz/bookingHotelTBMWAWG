@@ -7,13 +7,16 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
 	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
 	"github.com/justinas/nosurf"
 )
 
-var functions = template.FuncMap{}
+var functions = template.FuncMap{
+	"humanDate": HumanDate,
+}
 
 var app *config.AppConfig
 var tc map[string]*template.Template
@@ -21,7 +24,10 @@ var pathToTemplate = "./templates"
 
 func NewRender(a *config.AppConfig) {
 	app = a
+}
 
+func HumanDate(t time.Time) string {
+	return t.Format("2006-01-02")
 }
 
 func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
@@ -29,6 +35,9 @@ func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateDa
 	td.Warning = app.SessionManager.PopString(r.Context(), "warning")
 	td.Error = app.SessionManager.PopString(r.Context(), "error")
 	td.CSRFToken = nosurf.Token(r)
+	if app.SessionManager.Exists(r.Context(), "user_id") {
+		td.ISAuthenticated = 1
+	}
 	return td
 }
 

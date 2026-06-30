@@ -1,6 +1,7 @@
 # Go编译产物和构建文件
 bookings
 bookings.exe
+*.exe
 *.test
 *.test.exe
 cmd/web/bookings

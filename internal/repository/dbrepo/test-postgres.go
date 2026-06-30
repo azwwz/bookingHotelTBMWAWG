@@ -2,9 +2,10 @@ package dbrepo
 
 import (
 	"errors"
-	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
 	"log"
 	"time"
+
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
 )
 
 func (p *testPostgresDBRepo) AllUsers() bool {
@@ -60,13 +61,71 @@ func (p *testPostgresDBRepo) SearchAvailabilityForAllRooms(start, end time.Time)
 
 }
 
-// GetRoomByID get room by id
-func (p *testPostgresDBRepo) GetRoomByID(id int) (models.Room, error) {
-
-	var room models.Room
-	if id > 2 {
-		return room, errors.New("id can't more than 2")
+// GetUserByID returns a user by ID for testing
+func (p *testPostgresDBRepo) GetUserByID(id int) (models.User, error) {
+	var user models.User
+	if id > 10 {
+		return user, errors.New("user not found")
 	}
+	user.ID = id
+	user.FirstName = "Test"
+	user.LastName = "User"
+	user.Email = "test@example.com"
+	user.AccessLevel = 1
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+	return user, nil
+}
 
+// GetRoomByID returns a room by ID for testing
+func (p *testPostgresDBRepo) GetRoomByID(id int) (models.Room, error) {
+	var room models.Room
+	if id > 100 {
+		return room, errors.New("room not found")
+	}
+	room.ID = id
+	room.RoomName = "Test Room"
+	room.CreatedAt = time.Now()
+	room.UpdatedAt = time.Now()
 	return room, nil
+}
+
+// UpdaterUser updates a user for testing
+func (p *testPostgresDBRepo) UpdaterUser(u models.User) error {
+	if u.ID == 0 {
+		return errors.New("user ID cannot be zero")
+	}
+	return nil
+}
+
+// Authenticate authenticates a user for testing
+func (p *testPostgresDBRepo) Authenticate(email, password string) (int, string, error) {
+	if email == "fail@example.com" {
+		return 0, "", errors.New("authentication failed")
+	}
+	if email == "admin@example.com" {
+		return 1, "admin", nil
+	}
+	return 2, "user", nil
+}
+
+func (p *testPostgresDBRepo) AllReservations() ([]models.Reservation, error) {
+	var reservations []models.Reservation
+	return reservations, nil
+}
+
+func (p *testPostgresDBRepo) AllNewReservations() ([]models.Reservation, error) {
+
+	var reservations []models.Reservation
+
+	return reservations, nil
+}
+
+// GetReservationByID returns a reservation by ID for testing
+func (p *testPostgresDBRepo) GetReservationByID(id int) (models.Reservation, error) {
+	var reservation models.Reservation
+	if id == 123 {
+		return reservation, errors.New("reservation not found")
+	}
+	return reservation, nil
 }
