@@ -549,6 +549,72 @@ func (repo *Repository) AdminShowReservation(w http.ResponseWriter, r *http.Requ
 	})
 }
 
+// AdminPostShowReservation updates a reservation in admin tool
+func (repo *Repository) AdminPostShowReservation(w http.ResponseWriter, r *http.Request) {
+	// get id from url use split
+	urlParts := strings.Split(r.URL.Path, "/")
+	id, err := strconv.Atoi(urlParts[len(urlParts)-1])
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	// parse form
+	err = r.ParseForm()
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	// get reservation by id
+	reservation, err := repo.DB.GetReservationByID(id)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	// create map save src
+	src := urlParts[len(urlParts)-2]
+	stringMap := make(map[string]string)
+	stringMap["src"] = src
+
+	// check form
+	form := forms.NewForm(r.PostForm)
+	form.Require("first_name", "last_name", "email", "phone")
+	form.Minimum("first_name", 3)
+	form.IsEmail("email")
+	if !form.Valid() {
+		reservation.FirstName = form.Get("first_name")
+		reservation.LastName = form.Get("last_name")
+		reservation.Email = form.Get("email")
+		reservation.Phone = form.Get("phone")
+		data := make(map[string]interface{})
+		data["reservation"] = reservation
+		render.Template(w, r, "admin-reservation-show.page.html", &models.TemplateData{
+			Form:      form,
+			Data:      data,
+			StringMap: stringMap,
+		})
+		return
+	}
+
+	reservation.FirstName = form.Get("first_name")
+	reservation.LastName = form.Get("last_name")
+	reservation.Email = form.Get("email")
+	reservation.Phone = form.Get("phone")
+
+	// update reservation
+	err = repo.DB.UpdateReservation(reservation)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	// redirect to reservation show page
+	repo.App.SessionManager.Put(r.Context(), "flash", "reservation updated successfully")
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+}
+
 // AdminReservationsCalendar shows all reservations in admin tool calendar view
 func (repo *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "admin-reservations-calendar.page.html", &models.TemplateData{})

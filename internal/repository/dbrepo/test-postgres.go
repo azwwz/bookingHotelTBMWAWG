@@ -129,3 +129,27 @@ func (p *testPostgresDBRepo) GetReservationByID(id int) (models.Reservation, err
 	}
 	return reservation, nil
 }
+
+// UpdateReservation updates a reservation for testing
+func (p *testPostgresDBRepo) UpdateReservation(reservation models.Reservation) error {
+	if reservation.ID == 0 {
+		return errors.New("reservation ID cannot be zero")
+	}
+	return nil
+}
+
+// DeleteReservation deletes a reservation for testing
+func (p *testPostgresDBRepo) DeleteReservation(id int) error {
+	if id == 0 {
+		return errors.New("reservation ID cannot be zero")
+	}
+	return nil
+}
+
+// UpdateProcessedForReservation updates the processed status of a reservation for testing
+func (p *testPostgresDBRepo) UpdateProcessedForReservation(id int, processed int) error {
+	if id == 0 {
+		return errors.New("reservation ID cannot be zero")
+	}
+	return nil
+}

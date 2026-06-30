@@ -62,6 +62,7 @@ func routes(app *config.AppConfig) http.Handler {
 
 		// show reservation
 		r.Get("/reservations/{src}/{id}", handlers.Repo.AdminShowReservation)
+		r.Post("/reservations/{src}/{id}", handlers.Repo.AdminPostShowReservation)
 	})
 
 	return r
