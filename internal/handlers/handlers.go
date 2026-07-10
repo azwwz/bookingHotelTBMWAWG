@@ -42,28 +42,32 @@ func TestNewRepo(a *config.AppConfig) *Repository {
 	}
 }
 
+// SetRepo 设置仓库的全局变量
+// 参数:
+//
+//	r *Repository: 要设置的仓库指针
 func SetRepo(r *Repository) {
-	Repo = r
+	Repo = r // 将传入的仓库指针赋值给全局变量Repo
 }
 
 func (repo *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "home.page.html", &models.TemplateData{})
+	render.Template(w, r, "home.page.tmpl", &models.TemplateData{})
 }
 
 func (repo *Repository) About(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "about.page.html", &models.TemplateData{})
+	render.Template(w, r, "about.page.tmpl", &models.TemplateData{})
 }
 
 func (repo *Repository) Generals(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "generals.page.html", &models.TemplateData{})
+	render.Template(w, r, "generals.page.tmpl", &models.TemplateData{})
 }
 
 func (repo *Repository) Majors(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "majors.page.html", &models.TemplateData{})
+	render.Template(w, r, "majors.page.tmpl", &models.TemplateData{})
 }
 
 func (repo *Repository) Availability(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "search-availability.page.html", &models.TemplateData{})
+	render.Template(w, r, "search-availability.page.tmpl", &models.TemplateData{})
 }
 
 func (repo *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +113,7 @@ func (repo *Repository) PostAvailability(w http.ResponseWriter, r *http.Request)
 
 	repo.App.SessionManager.Put(r.Context(), "reservation", res)
 
-	err = render.Template(w, r, "choose-room.page.html", &models.TemplateData{
+	err = render.Template(w, r, "choose-room.page.tmpl", &models.TemplateData{
 		Data: data,
 	})
 	if err != nil {
@@ -180,7 +184,7 @@ func (repo *Repository) AvailabilityJson(w http.ResponseWriter, r *http.Request)
 }
 
 func (repo *Repository) Contact(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "contact.page.html", &models.TemplateData{})
+	render.Template(w, r, "contact.page.tmpl", &models.TemplateData{})
 }
 
 func (repo *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
@@ -215,8 +219,8 @@ func (repo *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 	data := make(map[string]interface{})
 	data["reservation"] = res
 
-	render.Template(w, r, "make-reservation.page.html", &models.TemplateData{
-		Form:      forms.NewForm(nil),
+	render.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{
+		Form:      &forms.Form{},
 		Data:      data,
 		StringMap: stringMap,
 	})
@@ -284,7 +288,7 @@ func (repo *Repository) PostReservation(w http.ResponseWriter, r *http.Request) 
 	if !form.Valid() {
 		data := make(map[string]interface{})
 		data["reservation"] = reservation
-		err := render.Template(w, r, "make-reservation.page.html", &models.TemplateData{
+		err := render.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{
 			Form: form,
 			Data: data,
 		})
@@ -357,7 +361,7 @@ func (repo *Repository) ReservationSummary(w http.ResponseWriter, r *http.Reques
 	stringMap["start_date"] = sd
 	stringMap["end_date"] = ed
 
-	err := render.Template(w, r, "reservation-summary.page.html", &models.TemplateData{
+	err := render.Template(w, r, "reservation-summary.page.tmpl", &models.TemplateData{
 		Data:      data,
 		StringMap: stringMap,
 	})
@@ -423,7 +427,7 @@ func (repo *Repository) BookRoom(w http.ResponseWriter, r *http.Request) {
 }
 
 func (repo *Repository) ShowLogin(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "login.page.html", &models.TemplateData{
+	render.Template(w, r, "login.page.tmpl", &models.TemplateData{
 		Form: forms.NewForm(nil),
 	})
 }
@@ -443,7 +447,7 @@ func (repo *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
 	form.Require("email", "password")
 	form.IsEmail("email")
 	if !form.Valid() {
-		render.Template(w, r, "login.page.html", &models.TemplateData{
+		render.Template(w, r, "login.page.tmpl", &models.TemplateData{
 			Form: form,
 		})
 		return
@@ -472,7 +476,7 @@ func (repo *Repository) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (repo *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "admin-dashboard.page.html", &models.TemplateData{})
+	render.Template(w, r, "admin-dashboard.page.tmpl", &models.TemplateData{})
 }
 
 // AdminNewReservations shows all new reservations in admin tool
@@ -486,7 +490,7 @@ func (repo *Repository) AdminNewReservations(w http.ResponseWriter, r *http.Requ
 
 	data := make(map[string]interface{})
 	data["reservations"] = reservations
-	render.Template(w, r, "admin-new-reservations.page.html", &models.TemplateData{
+	render.Template(w, r, "admin-new-reservations.page.tmpl", &models.TemplateData{
 		Data: data,
 	})
 }
@@ -501,7 +505,7 @@ func (repo *Repository) AdminAllReservations(w http.ResponseWriter, r *http.Requ
 	data := make(map[string]interface{})
 	data["reservations"] = reservations
 
-	render.Template(w, r, "admin-all-reservations.page.html", &models.TemplateData{
+	render.Template(w, r, "admin-all-reservations.page.tmpl", &models.TemplateData{
 		Data: data,
 	})
 }
@@ -515,7 +519,7 @@ func (repo *Repository) AdminNewReservation(w http.ResponseWriter, r *http.Reque
 	data := make(map[string]interface{})
 	data["reservations"] = reservations
 
-	render.Template(w, r, "admin-new-reservations.page.html", &models.TemplateData{
+	render.Template(w, r, "admin-new-reservations.page.tmpl", &models.TemplateData{
 		Data: data,
 	})
 
@@ -523,31 +527,36 @@ func (repo *Repository) AdminNewReservation(w http.ResponseWriter, r *http.Reque
 
 // AdminShowReservation shows a reservation in admin tool
 func (repo *Repository) AdminShowReservation(w http.ResponseWriter, r *http.Request) {
-	// get id from url use split
-	urlParts := strings.Split(r.URL.Path, "/")
-	id, err := strconv.Atoi(urlParts[len(urlParts)-1])
+	// get id from url use splite
+	parts := strings.Split(r.URL.Path, "/")
+	id, err := strconv.Atoi(parts[4])
 	if err != nil {
 		log.Println(err)
+		return
 	}
-	// create map save src
-	src := urlParts[len(urlParts)-2]
-	stringMap := make(map[string]string)
-	stringMap["src"] = src
-	// get reservation by id
+
+	src := parts[3]
+	stringmap := make(map[string]string)
+	stringmap["src"] = src
+
 	reservation, err := repo.DB.GetReservationByID(id)
 	if err != nil {
 		log.Println(err)
 	}
-	//create data save reservation
-	data := make(map[string]interface{})
-	data["reservation"] = reservation
 
-	render.Template(w, r, "admin-reservation-show.page.html", &models.TemplateData{
+	// create data
+	data := make(map[string]interface{})
+
+	// add reservation to data
+	data["reservation"] = reservation
+	render.Template(w, r, "admin-reservation-show.page.tmpl", &models.TemplateData{
+		Data: data,
+		StringMap: stringmap,
 		Form:      forms.NewForm(nil),
-		StringMap: stringMap,
-		Data:      data,
 	})
 }
+
+
 
 // AdminPostShowReservation updates a reservation in admin tool
 func (repo *Repository) AdminPostShowReservation(w http.ResponseWriter, r *http.Request) {
@@ -590,7 +599,7 @@ func (repo *Repository) AdminPostShowReservation(w http.ResponseWriter, r *http.
 		reservation.Phone = form.Get("phone")
 		data := make(map[string]interface{})
 		data["reservation"] = reservation
-		render.Template(w, r, "admin-reservation-show.page.html", &models.TemplateData{
+		render.Template(w, r, "admin-reservation-show.page.tmpl", &models.TemplateData{
 			Form:      form,
 			Data:      data,
 			StringMap: stringMap,
@@ -615,7 +624,68 @@ func (repo *Repository) AdminPostShowReservation(w http.ResponseWriter, r *http.
 	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
 }
 
+func (repo *Repository) AdminProcessReservation(w http.ResponseWriter, r *http.Request) {
+	// get id from url use split
+	urlParts := strings.Split(r.URL.Path, "/")
+	id, err := strconv.Atoi(urlParts[len(urlParts)-1])
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	repo.DB.UpdateProcessedForReservation(id, 1)
+	src := urlParts[len(urlParts)-2]
+	repo.App.SessionManager.Put(r.Context(), "flash", "Reservation processed successfully")
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+}
+// AdminDeleteReservation deletes a reservation in admin tool
+func (repo *Repository) AdminDeleteReservation(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	err = repo.DB.DeleteReservation(id)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	src := chi.URLParam(r, "src")
+	repo.App.SessionManager.Put(r.Context(), "flash", "Reservation deleted successfully")
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+}
+
 // AdminReservationsCalendar shows all reservations in admin tool calendar view
 func (repo *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "admin-reservations-calendar.page.html", &models.TemplateData{})
+	now := time.Now()
+
+	if r.URL.Query().Get("y") != ""{
+		year, _ := strconv.Atoi(r.URL.Query().Get("y"))
+		month, _ := strconv.Atoi(r.URL.Query().Get("m"))
+		now = time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.Local)
+	}
+	next := now.AddDate(0, 1, 0)
+	last := now.AddDate(0, -1, 0)
+
+	nextMonth := next.Format("01")
+	lastMonth := last.Format("01")
+
+	nextMonthYear := next.Format("2006")
+	lastMonthYear := last.Format("2006")
+	
+	stringMap := make(map[string]string)
+	stringMap["next_month"] = nextMonth
+	stringMap["next_month_year"] = nextMonthYear
+	stringMap["last_month"] = lastMonth
+	stringMap["last_month_year"] = lastMonthYear
+
+	stringMap["this_month"] = now.Format("01")
+	stringMap["this_month_year"] = now.Format("2006")
+
+	data := make(map[string]interface{})
+	data["now"] = now
+
+	render.Template(w, r, "admin-reservations-calendar.page.tmpl", &models.TemplateData{
+		StringMap: stringMap,
+		Data: data,
+	})
 }

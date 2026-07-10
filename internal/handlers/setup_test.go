@@ -3,13 +3,6 @@ package handlers
 import (
 	"encoding/gob"
 	"fmt"
-	"github.com/alexedwards/scs/v2"
-	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
-	"github.com/azwwz/bookingHotelTBMWAWG/internal/helpers"
-	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
-	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
-	"github.com/go-chi/chi/v5"
-	"github.com/justinas/nosurf"
 	"html/template"
 	"log"
 	"net/http"
@@ -17,6 +10,14 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/alexedwards/scs/v2"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/config"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/helpers"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/models"
+	"github.com/azwwz/bookingHotelTBMWAWG/internal/render"
+	"github.com/go-chi/chi/v5"
+	"github.com/justinas/nosurf"
 )
 
 func TestMain(m *testing.M) {
@@ -108,11 +109,11 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 
 	myCache := map[string]*template.Template{}
 
-	pages, err := filepath.Glob(fmt.Sprintf("%s/templates/*.page.html", pathToTemplate))
+	pages, err := filepath.Glob(fmt.Sprintf("%s/templates/*.page.tmpl", pathToTemplate))
 	if err != nil {
 		return myCache, err
 	}
-	_, err = filepath.Glob(fmt.Sprintf("%s/templates/*.layout.html", pathToTemplate))
+	_, err = filepath.Glob(fmt.Sprintf("%s/templates/*.layout.tmpl", pathToTemplate))
 	if err != nil {
 		return myCache, err
 	}
@@ -123,7 +124,7 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 			return myCache, err
 		}
 
-		ts, err = ts.ParseGlob(fmt.Sprintf("%s/templates/*.layout.html", pathToTemplate))
+		ts, err = ts.ParseGlob(fmt.Sprintf("%s/templates/*.layout.tmpl", pathToTemplate))
 		if err != nil {
 			return myCache, err
 		}

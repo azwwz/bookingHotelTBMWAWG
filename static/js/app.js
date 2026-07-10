@@ -69,6 +69,7 @@ function Prompt() {
         const { value: result } = await Swal.fire({
             title: title,
             html: msg,
+            icon: c.icon,
             backdrop: false,
             allowOutsideClick:false,
             focusConfirm: false,

@@ -31,7 +31,7 @@ func TestRenderTemplate(t *testing.T) {
 		t.Error(err)
 	}
 	mywriter := myWriter{}
-	err = Template(&mywriter, r, "home.page.html", &models.TemplateData{})
+	err = Template(&mywriter, r, "home.page.tmpl", &models.TemplateData{})
 	if err != nil {
 		t.Error("error writing template to browser", err)
 	}

@@ -16,6 +16,7 @@ import (
 
 var functions = template.FuncMap{
 	"humanDate": HumanDate,
+	"formatDate": FormatDate,
 }
 
 var app *config.AppConfig
@@ -30,6 +31,10 @@ func HumanDate(t time.Time) string {
 	return t.Format("2006-01-02")
 }
 
+// FormatData
+func FormatDate(t time.Time, f string) string {
+	return t.Format(f)
+}
 func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
 	td.Flash = app.SessionManager.PopString(r.Context(), "flash")
 	td.Warning = app.SessionManager.PopString(r.Context(), "warning")
@@ -78,11 +83,11 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 
 	myCache := map[string]*template.Template{}
 
-	pages, err := filepath.Glob(fmt.Sprintf("%s/*.page.html", pathToTemplate))
+	pages, err := filepath.Glob(fmt.Sprintf("%s/*.page.tmpl", pathToTemplate))
 	if err != nil {
 		return myCache, err
 	}
-	_, err = filepath.Glob(fmt.Sprintf("%s/*.layout.html", pathToTemplate))
+	_, err = filepath.Glob(fmt.Sprintf("%s/*.layout.tmpl", pathToTemplate))
 	if err != nil {
 		return myCache, err
 	}
@@ -93,7 +98,7 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 			return myCache, err
 		}
 
-		ts, err = ts.ParseGlob(fmt.Sprintf("%s/*.layout.html", pathToTemplate))
+		ts, err = ts.ParseGlob(fmt.Sprintf("%s/*.layout.tmpl", pathToTemplate))
 		if err != nil {
 			return myCache, err
 		}
