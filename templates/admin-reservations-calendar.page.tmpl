@@ -1,7 +1,7 @@
 {{template "admin" .}}
 
 {{define "page-title"}}
-    Reservations Calendar
+Reservations Calendar
 {{end}}
 
 {{define "css"}}
@@ -9,22 +9,50 @@
 {{end}}
 
 {{define "content"}}
-    {{$now := index .Data "now"}}
-    <div class="col-md-12">
-        <div class="text-center">
-            <h3>{{formatDate $now "January"}}/{{index .StringMap "this_month_year"}}</h3>
+{{$now := index .Data "now"}}
+{{$dim := index .IntMap "days_in_month"}}
+{{$rooms := index .Data "rooms"}}
+<div class="col-md-12">
+    <div class="text-center">
+        <h3>{{formatDate $now "January"}}/{{index .StringMap "this_month_year"}}</h3>
+    </div>
+
+    <div class="float-start">
+        <a class="btn btn-sm btn-outline-secondary" href="/admin/reservations-calendar?y={{index .StringMap "last_month_year"}}&m={{index .StringMap "last_month" }}">
+            &lt;&lt;
+        </a>
+    </div>
+
+    <div class="float-end">
+        <a class="btn btn-sm btn-outline-secondary" href="/admin/reservations-calendar?y={{index .StringMap "next_month_year"}}&m={{index .StringMap "next_month" }}">
+            &gt;&gt;
+        </a>
+    </div>
+
+    <div class="clearfix"></div>
+
+    {{range $rooms}}
+        {{$roomID := .ID}}
+        <h4 class="mt-4">{{.RoomName}}</h4>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm w-100">
+                {{range $index2 := iterate15 $dim 16}}
+                    <tr class="table-dark">
+                        {{range $index2}}
+                                <td class="text-center text-truncate">{{.}}</td>
+                        {{end}}
+                    </tr>
+                    <tr>
+                        {{range $index2}}
+                                <td class="text-center text-truncate">
+                                    <input type="checkbox">
+                                </td>
+                        {{end}}
+                    </tr>
+                {{end}}
+            </table>
         </div>
-
-        <div class="float-start">
-            <a class="btn btn-sm btn-outline-secondary" href="/admin/reservations-calendar?y={{index .StringMap "last_month_year"}}&m={{index .StringMap "last_month"}}">
-                &lt;&lt;
-            </a>
-        </div> 
-
-        <div class="float-end">
-            <a class="btn btn-sm btn-outline-secondary" href="/admin/reservations-calendar?y={{index .StringMap "next_month_year"}}&m={{index .StringMap "next_month"}}">
-                &gt;&gt;
-            </a>
-        </div> 
+    {{end}}
     </div>
 {{end}}

@@ -550,13 +550,11 @@ func (repo *Repository) AdminShowReservation(w http.ResponseWriter, r *http.Requ
 	// add reservation to data
 	data["reservation"] = reservation
 	render.Template(w, r, "admin-reservation-show.page.tmpl", &models.TemplateData{
-		Data: data,
+		Data:      data,
 		StringMap: stringmap,
 		Form:      forms.NewForm(nil),
 	})
 }
-
-
 
 // AdminPostShowReservation updates a reservation in admin tool
 func (repo *Repository) AdminPostShowReservation(w http.ResponseWriter, r *http.Request) {
@@ -637,6 +635,7 @@ func (repo *Repository) AdminProcessReservation(w http.ResponseWriter, r *http.R
 	repo.App.SessionManager.Put(r.Context(), "flash", "Reservation processed successfully")
 	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
 }
+
 // AdminDeleteReservation deletes a reservation in admin tool
 func (repo *Repository) AdminDeleteReservation(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -658,11 +657,15 @@ func (repo *Repository) AdminDeleteReservation(w http.ResponseWriter, r *http.Re
 func (repo *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 
-	if r.URL.Query().Get("y") != ""{
+	if r.URL.Query().Get("y") != "" {
 		year, _ := strconv.Atoi(r.URL.Query().Get("y"))
 		month, _ := strconv.Atoi(r.URL.Query().Get("m"))
 		now = time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.Local)
 	}
+
+	data := make(map[string]interface{})
+	data["now"] = now
+
 	next := now.AddDate(0, 1, 0)
 	last := now.AddDate(0, -1, 0)
 
@@ -671,7 +674,7 @@ func (repo *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http
 
 	nextMonthYear := next.Format("2006")
 	lastMonthYear := last.Format("2006")
-	
+
 	stringMap := make(map[string]string)
 	stringMap["next_month"] = nextMonth
 	stringMap["next_month_year"] = nextMonthYear
@@ -681,11 +684,27 @@ func (repo *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http
 	stringMap["this_month"] = now.Format("01")
 	stringMap["this_month_year"] = now.Format("2006")
 
-	data := make(map[string]interface{})
-	data["now"] = now
+	// get first day and last day of the month ----------
+	currentYear, currentMonth, _ := now.Date()
+	currentLocation := now.Location()
+
+	// set day = 0 means the last day of the previous month
+	lastOfMonth := time.Date(currentYear, currentMonth+1, 0, 0, 0, 0, 0, currentLocation)
+
+	intMap := make(map[string]int)
+	intMap["days_in_month"] = lastOfMonth.Day()
+
+	// get all rooms ----------
+	rooms, err := repo.DB.AllRooms()
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	data["rooms"] = rooms
 
 	render.Template(w, r, "admin-reservations-calendar.page.tmpl", &models.TemplateData{
 		StringMap: stringMap,
-		Data: data,
+		Data:      data,
+		IntMap:    intMap,
 	})
 }

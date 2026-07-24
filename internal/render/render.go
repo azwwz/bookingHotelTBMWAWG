@@ -15,8 +15,10 @@ import (
 )
 
 var functions = template.FuncMap{
-	"humanDate": HumanDate,
+	"humanDate":  HumanDate,
 	"formatDate": FormatDate,
+	"iterate":    Iterate,
+	"iterate15":  Iterate15,
 }
 
 var app *config.AppConfig
@@ -27,14 +29,39 @@ func NewRender(a *config.AppConfig) {
 	app = a
 }
 
+// HumanDate formats a time.Time object into a human-readable date string
 func HumanDate(t time.Time) string {
 	return t.Format("2006-01-02")
 }
 
-// FormatData
+// FormatData formats the date according to the provided format string
 func FormatDate(t time.Time, f string) string {
 	return t.Format(f)
 }
+
+// iterate returns a slice of integers from 1 to count
+func Iterate(count int) []int {
+	var i int
+	var items []int
+	for i = 1; i <= count; i++ {
+		items = append(items, i)
+	}
+	return items
+}
+
+// Iterate15 returns a slice of slices of integers from 1 to count of size 15
+func Iterate15(count int, size int) [][]int {
+	var i int
+	var item []int
+	var items [][]int
+	for i = 1; i <= count; i++ {
+		item = append(item, i)
+	}
+	items = append(items, item[0:size])
+	items = append(items, item[size:])
+	return items
+}
+
 func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
 	td.Flash = app.SessionManager.PopString(r.Context(), "flash")
 	td.Warning = app.SessionManager.PopString(r.Context(), "warning")

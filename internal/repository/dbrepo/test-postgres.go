@@ -153,3 +153,11 @@ func (p *testPostgresDBRepo) UpdateProcessedForReservation(id int, processed int
 	}
 	return nil
 }
+
+// AllRooms returns a slice of all rooms for testing
+func (p *testPostgresDBRepo) AllRooms() ([]models.Room, error) {
+	var rooms []models.Room
+	rooms = append(rooms, models.Room{ID: 1, RoomName: "Room 1"})
+	rooms = append(rooms, models.Room{ID: 2, RoomName: "Room 2"})
+	return rooms, nil
+}
