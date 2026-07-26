@@ -161,3 +161,21 @@ func (p *testPostgresDBRepo) AllRooms() ([]models.Room, error) {
 	rooms = append(rooms, models.Room{ID: 2, RoomName: "Room 2"})
 	return rooms, nil
 }
+
+func (p *testPostgresDBRepo) GetRestrictionsForRoomByDate(roomID int, start, end time.Time) ([]models.RoomRestriction, error) {
+	var restrictions []models.RoomRestriction
+
+	// Simulate a restriction for roomID 1 between 2024-01-01 and 2024-01-10
+	if roomID == 1 && start.Before(time.Date(2024, 1, 10, 0, 0, 0, 0, time.UTC)) && end.After(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)) {
+		restrictions = append(restrictions, models.RoomRestriction{
+			ID:        1,
+			StartDate: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+			EndDate:   time.Date(2024, 1, 10, 0, 0, 0, 0, time.UTC),
+			RoomID:    roomID,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		})
+	}
+
+	return restrictions, nil
+}

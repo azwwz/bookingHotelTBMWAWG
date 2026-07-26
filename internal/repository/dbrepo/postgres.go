@@ -462,3 +462,42 @@ func (m *postgresDBRepo) AllRooms() ([]models.Room, error) {
 	}
 	return rooms, nil
 }
+
+func (m *postgresDBRepo) GetRestrictionsForRoomByDate(roomID int, start, end time.Time) ([]models.RoomRestriction, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	var restrictions []models.RoomRestriction
+
+	// coalesce is used to return 0 if reservation_id is null
+	// beacause int type in Go cannot be null, so we use coalesce to return 0 instead of null
+	query := `select id, coalesce(reservation_id, 0), restriction_id, room_id, start_date, end_date
+				from room_restrictions
+				where room_id = $1 and $2 < end_date and $3 > start_date`
+
+	rows, err := m.DB.QueryContext(ctx, query, roomID, start, end)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var r models.RoomRestriction
+		err = rows.Scan(
+			&r.ID,
+			&r.ReservationID,
+			&r.RestrictionID,
+			&r.RoomID,
+			&r.StartDate,
+			&r.EndDate,
+		)
+		if err != nil {
+			return nil, err
+		}
+		restrictions = append(restrictions, r)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return restrictions, nil
+}
